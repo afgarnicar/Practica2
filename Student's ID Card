@@ -1,0 +1,37 @@
+-- Formatear el período para mostrarlo como "20XX-X"
+formatearPeriodo :: String -> String
+formatearPeriodo p = let (anio, semestre) = splitAt 2 p in anio ++ "-" ++ semestre
+
+-- Clasificar y describir la categoría del programa académico según el esquema de Nicómaco
+clasificarCategoria :: Int -> String
+clasificarCategoria numClasificacion
+    | sumaAlicuota > numClasificacion = "Administrative"  -- Administrativo (abundante)
+    | sumaAlicuota == numClasificacion = "Engineering"  -- Ingeniería (perfecto)
+    | otherwise = "Humanities"  -- Humanidades (deficiente)
+    where sumaAlicuota = sum [d | d <- [1..numClasificacion-1], numClasificacion `mod` d == 0]
+
+-- Descripción del número de matrícula
+descripcionMatricula :: String -> String -> Int -> String -> String
+descripcionMatricula periodo categoria numConsecutivo esParStr =
+    let anio = "20" ++ periodo
+    in anio ++ " " ++ categoria ++ " num" ++ show numConsecutivo ++ " " ++ esParStr
+
+-- Evaluar si el numero es par
+esPar :: Int -> Bool 
+esPar n = n `mod` 2 == 0
+
+main :: IO ()
+main = do
+    -- Solicitud del número de matrícula completo (8 dígitos)
+    matriculaStr <- getLine
+    if length matriculaStr /= 8
+        then putStrLn "El número de matrícula debe ser un número de 8 dígitos."
+        else do
+            let periodo = take 3 matriculaStr
+                numClasificacion = read (take 2 (drop 3 matriculaStr)) :: Int
+                numConsecutivo = read (drop 5 matriculaStr) :: Int
+                categoria = clasificarCategoria numClasificacion
+                descripcionPeriodo = formatearPeriodo periodo
+                esParStr = if esPar numConsecutivo then "even" else "odd"
+                descripcion = descripcionMatricula descripcionPeriodo categoria numConsecutivo esParStr
+            putStrLn descripcion
